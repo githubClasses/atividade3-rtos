@@ -1,14 +1,13 @@
 /*
- * --------------------------- Exercício 02 ----------------------------------
+ * --------------------------- Exercício 03 ----------------------------------
  *
  * Egydio Tadeu Gomes Ramos
  *
- * Stack Frame.
+ * Kernel.
  *
- *  - Implementa duas tasks blink_orange e blink_green
- *  - São criadas as stack frames para cada task
- *  - Na interrupção do systick, o contexto é mudado manualmente alterando
- *    o valor do apontador de pilha (sp)
+ *  - Implementação de um bloco de controle de tarefas básicos
+ *  - Algoritmo de escalonamento de tarefas usando lista circular
+ *  - Teste realizado utilizando três tasks de contadores
  */
 
 // ----------------------------------------------------------------------------
@@ -37,6 +36,8 @@
  * ------------- Definição de constantes e variáveis globais ------------------
  */
 
+// Declaração dos contadores para as tasks
+uint32_t c1 = 0, c2 = 0, c3 = 0;
 
 // ----------------------------------------------------------------------------
 
@@ -89,24 +90,18 @@ main(int argc, char* argv[])
 
 void count1()
 {
-  uint32_t c1 = 0;
-
   while(1)
     c1 += 1;
 }
 
 void count2()
 {
-  uint32_t c2 = 0;
-
   while(1)
     c2 += 2;
 }
 
 void count3()
 {
-  uint32_t c3 = 0;
-
   while(1)
     c3 += 3;
 }

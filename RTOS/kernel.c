@@ -111,6 +111,14 @@ SysTick_Handler()
 {
   /*
    * Sequência de instruções:
+   *    1) Colocar R4-R13 na pilha
+   *    2) Carregar R0 com currentPt
+   *    3) Carregar R1 com o valor do endereço em R0
+   *    4) Guargar conteúdo de R13 no endereço apontado por R1
+   *    5) Deslocar R1
+   *    6) Guardar R1 no endereço apontado por R0
+   *    7) Carregar R13 com valor do endereço apontado por R1
+   *    8) Liberar R4-R11
    */
   __disable_irq();
   __asm(
