@@ -71,9 +71,10 @@ int
 main(int argc, char* argv[])
 {
   __disable_irq();
+  osSemaphoreInit(&semaphore, SEMAPHORE_INIT_VALUE);
   osKernelInit();
   osKernelAddTasks(count1_task, count2_task, count3_task);
-  osKernelLaunch(10);
+  osKernelLaunch(1);
   while (1)
     {
 
@@ -91,19 +92,31 @@ main(int argc, char* argv[])
 void count1()
 {
   while(1)
+    osSemaphorePend(&semaphore);
+
     c1 += 1;
+
+    osSemaphorePost(&semaphore);
 }
 
 void count2()
 {
   while(1)
-    c2 += 2;
+    osSemaphorePend(&semaphore);
+
+    c2 += 1;
+
+    osSemaphorePost(&semaphore);
 }
 
 void count3()
 {
   while(1)
-    c3 += 3;
+    osSemaphorePend(&semaphore);
+
+    c3 += 1;
+
+    osSemaphorePost(&semaphore);
 }
 
 // ----------------------------------------------------------------------------

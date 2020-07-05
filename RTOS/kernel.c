@@ -134,4 +134,38 @@ SysTick_Handler()
   );
   __enable_irq();
 }
+
+void
+osSemaphoreInit(int32_t *semaphore, int32_t initial_value)
+{
+  __disable_irq();
+  *semaphore = initial_value;
+  __enable_irq();
+}
+
+void
+osSemaphorePost(int32_t *semaphore)
+{
+  __disable_irq();
+  *semaphore += 1;
+  __enable_irq();
+}
+
+void
+osSemaphorePend(int32_t *semaphore)
+{
+  while((*semaphore) < SEMAPHORE_INIT_VALUE)
+    {
+      osTaskYield();
+    }
+
+  __disable_irq();
+  *semaphore -= 1;
+  __enable_irq();
+}
+
+void osTaskYield()
+{
+  SysTick->VAL = 0;
+}
 // ----------------------------------------------------------------------------

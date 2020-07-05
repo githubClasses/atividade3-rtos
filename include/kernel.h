@@ -26,6 +26,7 @@
 #define BUS_FREQ SystemCoreClock
 #define NUMBER_OF_TASKS 3
 #define STACK_SIZE 100
+#define SEMAPHORE_INIT_VALUE 0
 
 // Criação do bloco de controle de tarefas
 
@@ -44,6 +45,9 @@ int32_t TCBS_STACK[NUMBER_OF_TASKS][STACK_SIZE];
 
 uint32_t MILLIS_PRESCALER;
 
+// Semáforo spinlock
+
+int32_t semaphore;
 
 // ----------------------------------------------------------------------------
 
@@ -67,6 +71,27 @@ void osKernelAddTasks(void (*task0)(),
 void osKernelStackInit(uint32_t taskIndex);
 
 void osSchedulerLaunch();
+
+// Funções de manipulação do semáforo
+
+/*
+ * Atribui um valor inicial ao semáforo
+ */
+void osSemaphoreInit(int32_t *semaphore, int32_t initial_value);
+
+/*
+ * Disponibiliza o semáforo
+ */
+void osSemaphorePost(int32_t *semaphore);
+
+/*
+ * Espera disponibilidade do semáforo
+ */
+void osSemaphorePend(int32_t *semaphore);
+
+// Para utilizar kernel cooperativo
+void osTaskYield();
+
 // ----------------------------------------------------------------------------
 
 #endif /* INCLUDE_KERNEL_H_ */
