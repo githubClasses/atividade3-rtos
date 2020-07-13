@@ -39,6 +39,14 @@
 // Declaração dos contadores para as tasks
 uint32_t c1 = 0, c2 = 0, c3 = 0;
 
+// Declaração dos semáforos
+
+int32_t semaphore1, semaphore2;
+
+//Criação do grupo de eventos
+uint8_t event_bits;
+
+
 // ----------------------------------------------------------------------------
 
 /*
@@ -71,7 +79,9 @@ int
 main(int argc, char* argv[])
 {
   __disable_irq();
-  osSemaphoreInit(&semaphore, SEMAPHORE_INIT_VALUE);
+  osGroupEventInit(&event_bits, EVENT_GROUP_INIT);
+  //osSemaphoreInit(&semaphore1, SEMAPHORE_INIT_VALUE);
+  //osSemaphoreInit(&semaphore2, SEMAPHORE_INIT_VALUE);
   osKernelInit();
   osKernelAddTasks(count1_task, count2_task, count3_task);
   osKernelLaunch(1);
@@ -92,31 +102,37 @@ main(int argc, char* argv[])
 void count1()
 {
   while(1)
-    osSemaphorePend(&semaphore);
+    {
+      c1 += 1;
 
-    c1 += 1;
-
-    osSemaphorePost(&semaphore);
+      //osSemaphorePend(&semaphore1);
+      //osSemaphorePost(&semaphore2);
+      osGroupEventSync(&event_bits, TASK0_BIT, ALL_SYNC_BITS);
+    }
 }
 
 void count2()
 {
   while(1)
-    osSemaphorePend(&semaphore);
+    {
+      c2 += 1;
 
-    c2 += 1;
+      //osSemaphorePend(&semaphore2);
+      //osSemaphorePost(&semaphore1);
+      osGroupEventSync(&event_bits, TASK1_BIT, ALL_SYNC_BITS);
 
-    osSemaphorePost(&semaphore);
+    }
 }
 
 void count3()
 {
   while(1)
-    osSemaphorePend(&semaphore);
+    {
+      c3 += 1;
 
-    c3 += 1;
+      osGroupEventSync(&event_bits, TASK2_BIT, ALL_SYNC_BITS);
 
-    osSemaphorePost(&semaphore);
+    }
 }
 
 // ----------------------------------------------------------------------------

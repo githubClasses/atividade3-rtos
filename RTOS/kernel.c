@@ -121,26 +121,17 @@ SysTick_Handler()
    *    8) Liberar R4-R11
    */
   __disable_irq();
-  __asm(
-      "PUSH {R4-R11}\n\t"
-      "LDR R0, =currentPt\n\t"
-      "LDR R1, [R0]\n\t"
-      "STR R13, [R1]\n\t"
-      "ADD R1, #4\n\t"
-      "LDR R1, [R1]\n\t"
-      "STR R1, [R0]\n\t"
-      "LDR R13, [R1]\n\t"
-      "POP {R4-R11}"
-  );
+  save_context();
+  restore_context();
   __enable_irq();
 }
 
 void
 osSemaphoreInit(int32_t *semaphore, int32_t initial_value)
 {
-  __disable_irq();
+  //__disable_irq();
   *semaphore = initial_value;
-  __enable_irq();
+  //__enable_irq();
 }
 
 void
@@ -154,12 +145,13 @@ osSemaphorePost(int32_t *semaphore)
 void
 osSemaphorePend(int32_t *semaphore)
 {
+  __disable_irq();
   while((*semaphore) < SEMAPHORE_INIT_VALUE)
     {
-      osTaskYield();
+      __enable_irq();
+      //osTaskYield();
+      __disable_irq();
     }
-
-  __disable_irq();
   *semaphore -= 1;
   __enable_irq();
 }
@@ -167,5 +159,29 @@ osSemaphorePend(int32_t *semaphore)
 void osTaskYield()
 {
   SysTick->VAL = 0;
+  INITCTRL = 0x04000000;
+}
+
+void osGroupEventInit(uint8_t *event_group, uint8_t initial_value)
+{
+  *event_group = initial_value;
+}
+
+void osGroupEventSync(uint8_t *event_group, uint8_t task_bit, uint8_t sync_byte)
+{
+  __disable_irq();
+  *event_group |= task_bit;
+
+  while((*event_group & task_bit) == task_bit)
+    {
+      __enable_irq();
+      if((*event_group & sync_byte) == sync_byte)
+        {
+          *event_group = 0;
+        }
+      __disable_irq();
+    }
+
+  __enable_irq();
 }
 // ----------------------------------------------------------------------------
