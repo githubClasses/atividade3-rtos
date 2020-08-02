@@ -20,15 +20,13 @@
  * ----------------------- Definição das Funções Auxiliares -------------------
  */
 
-void
-osKernelInit()
+void osKernelInit()
 {
   __disable_irq();
   MILLIS_PRESCALER = BUS_FREQ/1000;
 }
 
-void
-osKernelLaunch(uint32_t quanta)
+void osKernelLaunch(uint32_t quanta)
 {
   SysTick->CTRL = 0;
   SysTick->VAL = 0;
@@ -39,10 +37,9 @@ osKernelLaunch(uint32_t quanta)
 }
 
 
-void
-osKernelAddTasks(void (*task0)(),
-                 void (*task1)(),
-                 void (*task2)())
+void osKernelAddTasks(void (*task0)(),
+                      void (*task1)(),
+                      void (*task2)())
 {
   // Inicializa o apontador nextPt para formar a lista circular
   // e a pilha de cada tarefa
@@ -68,8 +65,7 @@ osKernelAddTasks(void (*task0)(),
 }
 
 
-void
-osKernelStackInit(uint32_t taskIndex)
+void osKernelStackInit(uint32_t taskIndex)
 {
   // Inicializa o valor de xPSR;
   TCBS_STACK[taskIndex][STACK_SIZE-1] = 1U << 24;
@@ -77,8 +73,7 @@ osKernelStackInit(uint32_t taskIndex)
   tcbs[taskIndex].stackPt = &TCBS_STACK[taskIndex][STACK_SIZE-16];
 }
 
-void
-osSchedulerLaunch()
+void osSchedulerLaunch()
 {
   /*
    * Sequência de instruções:
@@ -106,8 +101,7 @@ osSchedulerLaunch()
   __enable_irq();
 }
 
-void
-SysTick_Handler()
+void SysTick_Handler()
 {
   /*
    * Sequência de instruções:
@@ -126,24 +120,21 @@ SysTick_Handler()
   __enable_irq();
 }
 
-void
-osSemaphoreInit(int32_t *semaphore, int32_t initial_value)
+void osSemaphoreInit(int32_t *semaphore, int32_t initial_value)
 {
   //__disable_irq();
   *semaphore = initial_value;
   //__enable_irq();
 }
 
-void
-osSemaphorePost(int32_t *semaphore)
+void osSemaphorePost(int32_t *semaphore)
 {
   __disable_irq();
   *semaphore += 1;
   __enable_irq();
 }
 
-void
-osSemaphorePend(int32_t *semaphore)
+void osSemaphorePend(int32_t *semaphore)
 {
   __disable_irq();
   while((*semaphore) < SEMAPHORE_INIT_VALUE)
@@ -182,6 +173,34 @@ void osGroupEventSync(uint8_t *event_group, uint8_t task_bit, uint8_t sync_byte)
       __disable_irq();
     }
 
+  __enable_irq();
+}
+
+void osMailBoxPost(int32_t *mailBox, int32_t *message)
+{
+  __disable_irq();
+  while(mailBox != NULL)
+    {
+      __enable_irq();
+      osTaskYield();
+      __disable_irq();
+    }
+
+  mailBox = message;
+  __enable_irq();
+}
+
+void osMailBoxReceive(int32_t *mailBox, int32_t *message)
+{
+  __disable_irq();
+  while(mailBox == NULL)
+    {
+      __enable_irq();
+      osTaskYield();
+      __disable_irq();
+    }
+  message = mailBox;
+  mailBox = NULL;
   __enable_irq();
 }
 // ----------------------------------------------------------------------------

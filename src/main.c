@@ -63,11 +63,19 @@ void count1();
 void count2();
 void count3();
 
+void task1();
+void task2();
+void task3();
+
 // Apontadores para cada tarefa
 
 void (*count1_task)() = count1;
 void (*count2_task)() = count2;
 void (*count3_task)() = count3;
+
+void (*_task1)() = task1;
+void (*_task2)() = task2;
+void (*_task3)() = task3;
 
 // ----------------------------------------------------------------------------
 
@@ -80,10 +88,11 @@ main(int argc, char* argv[])
 {
   __disable_irq();
   osGroupEventInit(&event_bits, EVENT_GROUP_INIT);
+  mailBox = NULL;
   //osSemaphoreInit(&semaphore1, SEMAPHORE_INIT_VALUE);
   //osSemaphoreInit(&semaphore2, SEMAPHORE_INIT_VALUE);
   osKernelInit();
-  osKernelAddTasks(count1_task, count2_task, count3_task);
+  osKernelAddTasks(_task1, _task2, _task3);
   osKernelLaunch(1);
   while (1)
     {
@@ -98,6 +107,57 @@ main(int argc, char* argv[])
 /*
  * ----------------------- Definição das Tasks --------------------------------
  */
+
+// Teste MailBox
+void task1()
+{
+  int32_t sendMessageTask1 = 1;
+  int32_t executionCountTask1 = 0;
+
+  while(1)
+    {
+      executionCountTask1++;
+      if(executionCountTask1 == 7)
+        {
+          osMailBoxPost(mailBox, &sendMessageTask1);
+          executionCountTask1 = 0;
+        }
+
+      osTaskYield();
+    }
+}
+
+void task2()
+{
+  int32_t* receivedMessage;
+
+  while(1)
+    {
+      osMailBoxReceive(mailBox, receivedMessage);
+      printf("Mensagem recebida da tarefa %d\n", receivedMessage);
+    }
+}
+
+void task3()
+{
+  int32_t sendMessageTask3 = 3;
+  int32_t executionCountTask3 = 0;
+
+  while(1)
+    {
+      executionCountTask3++;
+      if(executionCountTask3 == 12)
+        {
+          osMailBoxPost(mailBox, &sendMessageTask3);
+          executionCountTask3 = 0;
+        }
+
+      osTaskYield();
+    }
+}
+
+
+// Contadores
 
 void count1()
 {

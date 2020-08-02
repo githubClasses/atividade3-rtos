@@ -73,6 +73,11 @@ int32_t TCBS_STACK[NUMBER_OF_TASKS][STACK_SIZE];
 
 uint32_t MILLIS_PRESCALER;
 
+// Caixa de mensagens
+
+int32_t* mailBox;
+
+
 // ----------------------------------------------------------------------------
 
 /*
@@ -121,6 +126,13 @@ void osTaskYield();
 void osGroupEventInit(uint8_t *event_group, uint8_t initial_value);
 
 void osGroupEventSync(uint8_t *event_group, uint8_t task_bit, uint8_t sync_byte);
+
+// Funções de manipulação da caixa de mensagens
+
+void osMailBoxPost(int32_t *mailBox, int32_t *message);
+
+void osMailBoxReceive(int32_t *mailBox, int32_t *message);
+
 
 // ----------------------------------------------------------------------------
 
